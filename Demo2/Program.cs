@@ -20,8 +20,8 @@ namespace UnicornNetAcquisitionExample
             GCHandle receiveBufferHandle = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
             _device.StartAcquisition(false);
 
-            //while(true)
-            for (int i = 0; i < 100; i++)
+            while(true)
+            //for (int i = 0; i < 100; i++)
             {
                 _device.GetData(FrameLength, receiveBufferHandle.AddrOfPinnedObject(), (uint)(receiveBuffer.Length / sizeof(float)));
                for(int k = 0; k < 17; k++)
