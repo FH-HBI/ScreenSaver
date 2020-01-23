@@ -7,21 +7,16 @@ using System.Linq;
 using System;
 using Gtec.Unicorn;
 
-public class ChangeLifetime : MonoBehaviour
+public class UnicornScript : MonoBehaviour
 {
-    [SerializeField] string testFileName;
     [SerializeField] Text text;
-    [SerializeField] bool useRecordedFile = false;
 
     private ParticleSystem ps = null;
-    private TestCSVParser csvP = null;
     private Unicorn unicornDevice = null;
 
-    private uint FrameLength;
-    private float[] result = new float[8];
-    private byte[] receiveBuffer;
-    private GCHandle receiveBufferHandle;
-
+    uint FrameLength;
+    byte[] receiveBuffer;
+    GCHandle receiveBufferHandle;
     private bool animationRunning = true;
 
     public List<float[]> arrays = new List<float[]>();
@@ -30,21 +25,15 @@ public class ChangeLifetime : MonoBehaviour
 
     void Start()
     {
-        if (useRecordedFile)
-            csvP = new TestCSVParser("Assets/TestFiles/" + testFileName);
+        unicornDevice = new Unicorn("UN-2019.02.86");
+        print(unicornDevice.GetDeviceInformation().DeviceVersion);
+        FrameLength = 1;
+        uint numberOfAcquiredChannels = unicornDevice.GetNumberOfAcquiredChannels();
+        print(numberOfAcquiredChannels);
+        receiveBuffer = new byte[FrameLength * sizeof(float) * numberOfAcquiredChannels];
+        receiveBufferHandle = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
 
-        else
-        {
-            unicornDevice = new Unicorn("UN-2019.02.86");
-            print(unicornDevice.GetDeviceInformation().DeviceVersion);
-            FrameLength = 1;
-            uint numberOfAcquiredChannels = unicornDevice.GetNumberOfAcquiredChannels();
-            print(numberOfAcquiredChannels);
-            receiveBuffer = new byte[FrameLength * sizeof(float) * numberOfAcquiredChannels];
-            receiveBufferHandle = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
-
-            unicornDevice.StartAcquisition(false);
-        }
+        unicornDevice.StartAcquisition(false);
 
         ps = GetComponent<ParticleSystem>();
 
@@ -55,37 +44,30 @@ public class ChangeLifetime : MonoBehaviour
     }
     private void OnDestroy()
     {
-        if (!useRecordedFile)
-            unicornDevice.StopAcquisition();
+        unicornDevice.StopAcquisition();
     }
+
     void Update()
     {
         if (animationRunning)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                unicornDevice.StopAcquisition();
                 animationRunning = false;
                 text.text += "\nPAUSIERT";
+                print("Animation pausiert");
                 Time.timeScale = 0f;
             }
-                
 
             float[] values;
 
             // particle system modules
             var noise = ps.noise;
 
-            // read values from each EEG channel into a buffer
+            // read values from each EEG channel into a buffer:
+            values = ReadUnicornData();
 
-            // for non-live testing purposes, read line of data from prerecorded file
-            if (useRecordedFile)
-            {
-                values = csvP.ReadLine(8);
-            }
-            else
-            {
-                values = ReadUnicornData();
-            }
 
             for (int i = 0; i < 8; i++)
             {
@@ -118,23 +100,28 @@ public class ChangeLifetime : MonoBehaviour
                 text.text = "Höchster Wert auf allen Kanälen:\n" + arrayMax.ToString("F2");
             }
         }
+
         else
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                unicornDevice.StartAcquisition(false);
                 animationRunning = true;
                 Time.timeScale = 1f;
+                print("Animation fortgesetzt.");
             }
         }
+
     }
 
     private float[] ReadUnicornData()
     {
+        float[] result = new float[17];
         unicornDevice.GetData(FrameLength, receiveBufferHandle.AddrOfPinnedObject(), (uint)(receiveBuffer.Length / sizeof(float)));
-        for (int k = 0; k < 8; k++)
+        for (int k = 0; k < 17; k++)
         {
             byte[] tmp = new byte[4];
-            for (int j = 4 * k + 0; j < 4 * k + 4; j++)
+            for (int j = 4 * k; j < 4 * k + 4; j++)
             {
                 tmp[j % 4] = receiveBuffer[j];
             }

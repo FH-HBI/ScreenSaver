@@ -5,15 +5,14 @@ using UnityEngine;
 public class Frage
 {
     // Start is called before the first frame update
+    
     public string text;
-    public Frage nein;
-    public Frage ja;
-    public int index;
+    public int[] werte = new int[5];
 
-    public Frage(string pText = "", Frage pNein = null, Frage pJa = null, int pIndex = 0){
+    public Frage(string pText = "", int wertInf = 0, int wertETec = 0, int wertMCD = 0, int wertWI = 0, int wertSmart = 0){
         text = pText;
-        nein = pNein;
-        ja = pJa;
-        index = pIndex;
+        int[] pWerte = {wertInf, wertETec, wertMCD, wertWI, wertSmart};
+        werte = pWerte;
     }
+    
 }

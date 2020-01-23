@@ -5,8 +5,8 @@ using UnityEngine;
 [CreateAssetMenu]
 public class FragenKatalog : ScriptableObject
 {
-    public Frage[] fragen = new Frage[5];
-    public string[] antworten = new string[5];
-    public int laenge = 5;
+    public Frage[] fragen = new Frage[12];
+    public int[] faecher = new int[5];
+    public string[] faecherbezeichnung = new string[5];
     public int pos = 0;
 }
