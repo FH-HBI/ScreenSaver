@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb39eafcb02a38140b940bfc2f8f211b, type: 3}
-  m_Name: FragenKatalog
+  m_Script: {fileID: 11500000, guid: b820a044bca440b449c9c864f6f6bfa8, type: 3}
+  m_Name: SpellerAntwort
   m_EditorClassIdentifier: 
-  pos: 0
+  antwort: Keine Antwort
+  neueAntwort: 0
